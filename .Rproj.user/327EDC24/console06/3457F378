@@ -1,0 +1,11 @@
+]0;/stor/home/cmn2223/Website]0;cmn2223@educcomp01: ~/Website[01;32mcmn2223@educcomp01[00m:[01;34m~/Website[00m$ [K]0;cmn2223@educcomp01: ~/Website[01;32mcmn2223@educcomp01[00m:[01;34m~/Website[00m$ ls
+config.toml  index.Rmd  [0m[01;34mstatic[0m  Website.Rproj
+[01;34mcontent[0m      [01;34mpublic[0m     [01;34mthemes[0m
+]0;/stor/home/cmn2223/Website]0;cmn2223@educcomp01: ~/Website[01;32mcmn2223@educcomp01[00m:[01;34m~/Website[00m$ git in[K[Kinit
+Initialized empty Git repository in /stor/home/cmn2223/Website/.git/
+]0;/stor/home/cmn2223/Website]0;cmn2223@educcomp01: ~/Website[01;32mcmn2223@educcomp01[00m:[01;34m~/Website[00m$ git add.
+git: 'add.' is not a git command. See 'git --help'.
+
+The most similar command is
+	add
+]0;/stor/home/cmn2223/Website]0;cmn2223@educcomp01: ~/Website[01;32mcmn2223@educcomp01[00m:[01;34m~/Website[00m$ git add .

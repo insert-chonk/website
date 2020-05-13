@@ -1,0 +1,292 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "SDS348"
+date: '2020-03-15'
+output:
+  pdf_document:
+    toc: no
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+
+
+<pre class="r"><code>library(tidyverse)</code></pre>
+<p>I chose a dataset on Coronavirus statistics with variables of date reported, country, new confirmed cases, new deaths, geographic ID, and European Union status. I also chose the 2019 World Happiness report dataset, which is based on a survey of global happiness by country and includes the variables for overall happiness rank among countries, happiness score from 1-10, and the following variables that indicate how much of each variable contributes to the overall happiness score: GDP per capita, social support, healthy life expectancy, freedom to make life choices, generosity, and perceptions of corruption. I found both these datasets on Kaggle. I chose them because of Coronvirus’ relevancy in today’s news and our daily lives, and to see how different countries were affected. When the 2020 happiness report comes in, I hope to compare it to this data and see whether scores changed perhaps due to degree of being affected by Coronavirus. I predict that Coronavirus affects countries with lower happiness scores more severely.</p>
+<pre class="r"><code>corona_data &lt;- read.csv(&quot;corona_data.csv&quot;, header = T)
+worldhappiness &lt;- read.csv(&quot;worldhappiness.csv&quot;, header = T)
+corona_data &lt;- corona_data %&gt;% rename(Country = CountryExp)
+worldhappiness &lt;- worldhappiness %&gt;% rename(Country = Country.or.region)
+
+corona_data %&gt;% anti_join(worldhappiness)</code></pre>
+<pre><code>##        DateRep                                    Country NewConfCases
+## 1   14/03/2020                                    Andorra            1
+## 2     3/3/2020                                    Andorra            1
+## 3   14/03/2020                          Brunei Darussalam           12
+## 4   13/03/2020                          Brunei Darussalam           14
+## 5    12/3/2020                          Brunei Darussalam           10
+## 6    10/3/2020                          Brunei Darussalam            1
+## 7    10/3/2020 Cases on an international conveyance Japan           -9
+## 8     2/3/2020 Cases on an international conveyance Japan            0
+## 9     1/3/2020 Cases on an international conveyance Japan            0
+## 10  29/02/2020 Cases on an international conveyance Japan            0
+## 11  28/02/2020 Cases on an international conveyance Japan            0
+## 12  27/02/2020 Cases on an international conveyance Japan           14
+## 13  26/02/2020 Cases on an international conveyance Japan            0
+## 14  25/02/2020 Cases on an international conveyance Japan            0
+## 15  24/02/2020 Cases on an international conveyance Japan           57
+## 16  23/02/2020 Cases on an international conveyance Japan            0
+##     NewDeaths    GeoId         EU
+## 1           0       AD Non-EU/EEA
+## 2           0       AD Non-EU/EEA
+## 3           0       BN Non-EU/EEA
+## 4           0       BN Non-EU/EEA
+## 5           0       BN Non-EU/EEA
+## 6           0       BN Non-EU/EEA
+## 7           1 JPG11668          0
+## 8           0 JPG11668          0
+## 9           0 JPG11668          0
+## 10          2 JPG11668          0
+## 11          0 JPG11668          0
+## 12          0 JPG11668          0
+## 13          1 JPG11668          0
+## 14          0 JPG11668          0
+## 15          1 JPG11668          0
+## 16          0 JPG11668          0
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 287 rows ]</code></pre>
+<pre class="r"><code>worlddata &lt;- corona_data %&gt;% left_join(worldhappiness)
+glimpse(worlddata)</code></pre>
+<pre><code>## Observations: 5,001
+## Variables: 14
+## $ DateRep                      &lt;fct&gt; 11/3/2020, 8/3/2020, 2/3/2020, 1/3/2020,…
+## $ Country                      &lt;chr&gt; &quot;Afghanistan&quot;, &quot;Afghanistan&quot;, &quot;Afghanist…
+## $ NewConfCases                 &lt;int&gt; 3, 3, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0…
+## $ NewDeaths                    &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ GeoId                        &lt;fct&gt; AF, AF, AF, AF, AF, AF, AF, AF, AF, AF, …
+## $ EU                           &lt;fct&gt; Non-EU/EEA, Non-EU/EEA, Non-EU/EEA, Non-…
+## $ Overall.rank                 &lt;int&gt; 154, 154, 154, 154, 154, 154, 154, 154, …
+## $ Score                        &lt;dbl&gt; 3.203, 3.203, 3.203, 3.203, 3.203, 3.203…
+## $ GDP.per.capita               &lt;dbl&gt; 0.35, 0.35, 0.35, 0.35, 0.35, 0.35, 0.35…
+## $ Social.support               &lt;dbl&gt; 0.517, 0.517, 0.517, 0.517, 0.517, 0.517…
+## $ Healthy.life.expectancy      &lt;dbl&gt; 0.361, 0.361, 0.361, 0.361, 0.361, 0.361…
+## $ Freedom.to.make.life.choices &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+## $ Generosity                   &lt;dbl&gt; 0.158, 0.158, 0.158, 0.158, 0.158, 0.158…
+## $ Perceptions.of.corruption    &lt;dbl&gt; 0.025, 0.025, 0.025, 0.025, 0.025, 0.025…</code></pre>
+<p>I chose to keep all the coronavirus data and have the happiness variables as an additional factor (not all countries in the coronavirus dataset are on the happiness dataset). The coronavirus data is also logged by day, so it is important to retain each datapoint to conduct accurate analyses. No cases were dropped.</p>
+<pre class="r"><code># new variable MortalityRate
+world1 &lt;- worlddata %&gt;% separate(DateRep, into = c(&quot;day&quot;, &quot;month&quot;, 
+    &quot;year&quot;), sep = &quot;/&quot;) %&gt;% unite(year, month, day, col = &quot;date&quot;, 
+    sep = &quot;-&quot;, remove = F) %&gt;% arrange(Country, date) %&gt;% group_by(Country) %&gt;% 
+    mutate(MortalityRate = cumsum(NewDeaths)/cumsum(NewConfCases))
+
+world1 %&gt;% arrange(desc(date))</code></pre>
+<pre><code>## # A tibble: 5,001 x 18
+## # Groups:   Country [122]
+##    date  day   month year  Country NewConfCases NewDeaths GeoId EU   
+##    &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt; &lt;chr&gt;          &lt;int&gt;     &lt;int&gt; &lt;fct&gt; &lt;fct&gt;
+##  1 2020… 9     3     2020  Albania            2         0 AL    EU C…
+##  2 2020… 9     3     2020  Algeria            3         0 DZ    Non-…
+##  3 2020… 9     3     2020  Argent…            3         0 AR    Non-…
+##  4 2020… 9     3     2020  Austra…            6         0 AU    Non-…
+##  5 2020… 9     3     2020  Austria            3         0 AT    EU   
+##  6 2020… 9     3     2020  Bahrain           16         0 BH    Non-…
+##  7 2020… 9     3     2020  Bangla…            3         0 BD    Non-…
+##  8 2020… 9     3     2020  Belgium           31         0 BE    EU   
+##  9 2020… 9     3     2020  Brazil            12         0 BR    Non-…
+## 10 2020… 9     3     2020  Bulgar…            2         0 BG    EU   
+## # … with 4,991 more rows, and 9 more variables: Overall.rank &lt;int&gt;,
+## #   Score &lt;dbl&gt;, GDP.per.capita &lt;dbl&gt;, Social.support &lt;dbl&gt;,
+## #   Healthy.life.expectancy &lt;dbl&gt;, Freedom.to.make.life.choices &lt;dbl&gt;,
+## #   Generosity &lt;dbl&gt;, Perceptions.of.corruption &lt;dbl&gt;, MortalityRate &lt;dbl&gt;</code></pre>
+<pre class="r"><code>world1 %&gt;% group_by(Country) %&gt;% na.omit(MortalityRate) %&gt;% summarize(mean(MortalityRate))</code></pre>
+<pre><code>## # A tibble: 105 x 2
+##    Country     `mean(MortalityRate)`
+##    &lt;chr&gt;                       &lt;dbl&gt;
+##  1 Afghanistan               0      
+##  2 Albania                   0.0104 
+##  3 Algeria                   0.232  
+##  4 Argentina                 0.0442 
+##  5 Armenia                   0      
+##  6 Australia                 0.00191
+##  7 Austria                   0.00316
+##  8 Azerbaijan                0      
+##  9 Bahrain                   0      
+## 10 Bangladesh                0      
+## # … with 95 more rows</code></pre>
+<pre class="r"><code>world1 &lt;- world1 %&gt;% mutate(EU = recode(EU, `0` = &quot;Cruise Ship in Japan&quot;))
+
+# Correlation matrix
+worlddata %&gt;% na.omit() %&gt;% select_if(is.numeric) %&gt;% cor()</code></pre>
+<pre><code>##                              NewConfCases    NewDeaths Overall.rank       Score
+## NewConfCases                  1.000000000  0.736229978   0.04740998 -0.04371241
+## NewDeaths                     0.736229978  1.000000000   0.05988283 -0.05780844
+## Overall.rank                  0.047409982  0.059882826   1.00000000 -0.98775871
+## Score                        -0.043712406 -0.057808442  -0.98775871  1.00000000
+## GDP.per.capita               -0.010308389 -0.017472534  -0.78302550  0.77362255
+## Social.support               -0.048669254 -0.054628863  -0.84147494  0.84083118
+## Healthy.life.expectancy       0.035702559  0.037316675  -0.72282915  0.72422458
+## Freedom.to.make.life.choices  0.004577382 -0.007734996  -0.52906246  0.57240483
+## Generosity                   -0.069551621 -0.083542902  -0.33530929  0.37257856
+## Perceptions.of.corruption    -0.031503035 -0.051175136  -0.59606876  0.65211981
+##                              GDP.per.capita Social.support
+## NewConfCases                    -0.01030839    -0.04866925
+## NewDeaths                       -0.01747253    -0.05462886
+## Overall.rank                    -0.78302550    -0.84147494
+## Score                            0.77362255     0.84083118
+## GDP.per.capita                   1.00000000     0.69242052
+## Social.support                   0.69242052     1.00000000
+## Healthy.life.expectancy          0.77848720     0.71683494
+## Freedom.to.make.life.choices     0.38048853     0.50512714
+## Generosity                       0.23249898     0.25444045
+## Perceptions.of.corruption        0.55988218     0.46548304
+##                              Healthy.life.expectancy
+## NewConfCases                              0.03570256
+## NewDeaths                                 0.03731667
+## Overall.rank                             -0.72282915
+## Score                                     0.72422458
+## GDP.per.capita                            0.77848720
+## Social.support                            0.71683494
+## Healthy.life.expectancy                   1.00000000
+## Freedom.to.make.life.choices              0.32768091
+## Generosity                                0.15769472
+## Perceptions.of.corruption                 0.52729306
+##                              Freedom.to.make.life.choices  Generosity
+## NewConfCases                                  0.004577382 -0.06955162
+## NewDeaths                                    -0.007734996 -0.08354290
+## Overall.rank                                 -0.529062458 -0.33530929
+## Score                                         0.572404834  0.37257856
+## GDP.per.capita                                0.380488529  0.23249898
+## Social.support                                0.505127144  0.25444045
+## Healthy.life.expectancy                       0.327680909  0.15769472
+## Freedom.to.make.life.choices                  1.000000000  0.48651273
+## Generosity                                    0.486512727  1.00000000
+## Perceptions.of.corruption                     0.534234104  0.38727363
+##                              Perceptions.of.corruption
+## NewConfCases                               -0.03150304
+## NewDeaths                                  -0.05117514
+## Overall.rank                               -0.59606876
+## Score                                       0.65211981
+## GDP.per.capita                              0.55988218
+## Social.support                              0.46548304
+## Healthy.life.expectancy                     0.52729306
+## Freedom.to.make.life.choices                0.53423410
+## Generosity                                  0.38727363
+## Perceptions.of.corruption                   1.00000000</code></pre>
+<pre class="r"><code>worlddata %&gt;% summarize(mean(Freedom.to.make.life.choices, na.rm = T), 
+    sd(Freedom.to.make.life.choices, na.rm = T), var(Freedom.to.make.life.choices, 
+        na.rm = T), min(Freedom.to.make.life.choices, na.rm = T), 
+    max(Freedom.to.make.life.choices, na.rm = T), n_distinct(Freedom.to.make.life.choices, 
+        na.rm = T))</code></pre>
+<pre><code>##   mean(Freedom.to.make.life.choices, na.rm = T)
+## 1                                     0.4308968
+##   sd(Freedom.to.make.life.choices, na.rm = T)
+## 1                                   0.1418821
+##   var(Freedom.to.make.life.choices, na.rm = T)
+## 1                                   0.02013052
+##   min(Freedom.to.make.life.choices, na.rm = T)
+## 1                                            0
+##   max(Freedom.to.make.life.choices, na.rm = T)
+## 1                                        0.609
+##   n_distinct(Freedom.to.make.life.choices, na.rm = T)
+## 1                                                  89</code></pre>
+<pre class="r"><code>worlddata %&gt;% group_by(EU, Country) %&gt;% summarize(mean(Score, 
+    na.rm = T), sd(Score, na.rm = T), var(Score, na.rm = T), 
+    min(Score, na.rm = T), max(Score, na.rm = T), n_distinct(Score, 
+        na.rm = T))</code></pre>
+<pre><code>## # A tibble: 122 x 8
+## # Groups:   EU [7]
+##    EU    Country `mean(Score, na… `sd(Score, na.r… `var(Score, na.…
+##    &lt;fct&gt; &lt;chr&gt;              &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+##  1 0     Cases …           NaN                  NA               NA
+##  2 EEA   Iceland             7.49                0                0
+##  3 EEA   Liecht…           NaN                  NA               NA
+##  4 EEA   Norway              7.55                0                0
+##  5 EU    Austria             7.25                0                0
+##  6 EU    Belgium             6.92                0                0
+##  7 EU    Bulgar…             5.01                0                0
+##  8 EU    Croatia             5.43                0                0
+##  9 EU    Cyprus              6.05                0                0
+## 10 EU    Czech …             6.85                0                0
+## # … with 112 more rows, and 3 more variables: `min(Score, na.rm = T)` &lt;dbl&gt;,
+## #   `max(Score, na.rm = T)` &lt;dbl&gt;, `n_distinct(Score, na.rm = T)` &lt;int&gt;</code></pre>
+<pre class="r"><code>worlddata %&gt;% group_by(Country) %&gt;% summarize(mean(Social.support, 
+    na.rm = T), sd(Social.support, na.rm = T), var(Social.support, 
+    na.rm = T), min(Social.support, na.rm = T), max(Social.support, 
+    na.rm = T), n_distinct(Social.support, na.rm = T)) %&gt;% pivot_longer(cols = c(contains(&quot;=&quot;))) %&gt;% 
+    separate(name, into = c(&quot;stat&quot;), sep = &quot;T&quot;)</code></pre>
+<pre><code>## # A tibble: 732 x 3
+##    Country     stat                                  value
+##    &lt;chr&gt;       &lt;chr&gt;                                 &lt;dbl&gt;
+##  1 Afghanistan &quot;mean(Social.support, na.rm = &quot;       0.517
+##  2 Afghanistan &quot;sd(Social.support, na.rm = &quot;         0    
+##  3 Afghanistan &quot;var(Social.support, na.rm = &quot;        0    
+##  4 Afghanistan &quot;min(Social.support, na.rm = &quot;        0.517
+##  5 Afghanistan &quot;max(Social.support, na.rm = &quot;        0.517
+##  6 Afghanistan &quot;n_distinct(Social.support, na.rm = &quot; 1    
+##  7 Albania     &quot;mean(Social.support, na.rm = &quot;       0.848
+##  8 Albania     &quot;sd(Social.support, na.rm = &quot;         0    
+##  9 Albania     &quot;var(Social.support, na.rm = &quot;        0    
+## 10 Albania     &quot;min(Social.support, na.rm = &quot;        0.848
+## # … with 722 more rows</code></pre>
+<pre class="r"><code>worlddata %&gt;% filter(EU == &quot;EU&quot;) %&gt;% summarize(mean(Score))</code></pre>
+<pre><code>##   mean(Score)
+## 1    6.655251</code></pre>
+<pre class="r"><code>worlddata %&gt;% filter(EU == &quot;EEA&quot;) %&gt;% summarize(mean(Score, na.rm = T))</code></pre>
+<pre><code>##   mean(Score, na.rm = T)
+## 1                  7.524</code></pre>
+<pre class="r"><code>worlddata %&gt;% filter(EU == &quot;Non-EU/EEA&quot;) %&gt;% summarize(mean(Score, 
+    na.rm = T))</code></pre>
+<pre><code>##   mean(Score, na.rm = T)
+## 1               5.652424</code></pre>
+<pre class="r"><code># correlation heatmap
+worlddata %&gt;% na.omit() %&gt;% select_if(is.numeric) %&gt;% cor %&gt;% 
+    as.data.frame %&gt;% rownames_to_column %&gt;% pivot_longer(-1) %&gt;% 
+    ggplot(aes(rowname, name, fill = value)) + geom_tile() + 
+    geom_text(aes(label = round(value, 2))) + xlab(&quot;&quot;) + ylab(&quot;&quot;) + 
+    scale_fill_gradient2(low = &quot;red&quot;, high = &quot;blue&quot;) + theme(axis.text.x = element_text(angle = 45, 
+    vjust = 1, size = 12, hjust = 1))</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-4-1.png" width="672" style="display: block; margin: auto;" /> In the correlation heatmap, social support has the highest correlation (0.84) to a country’s happiness score. Generosity contributes the least to a country’s overall happiness score, with a correlation of 0.37. The overall rank correlations are negative because the “lower number” in rank is a higher rank, i.e. rank 1 would be the happiest country. New cases are positively correlated with new deaths (0.74). However, Coronavirus targets countries indiscriminately regardless of factors associated with happiness, as there is very little if any correlation between either new cases or new deaths and any of the happiness variables (-0.08-0.06 range).</p>
+<pre class="r"><code># ggplots
+ggplot(world1, aes(date, NewConfCases, color = Country)) + geom_line() + 
+    scale_color_hue() + theme(legend.position = &quot;none&quot;) + geom_point() + 
+    labs(title = &quot;New Coronavirus Cases Over Time&quot;, x = &quot;Date (12/31/2019 - 03/09/2020)&quot;, 
+        y = &quot;Number of New Confirmed Cases&quot;) + scale_y_continuous(breaks = waiver()) + 
+    theme(axis.text.x = element_text(size = 2, angle = 45)) + 
+    facet_wrap(~EU, scale = &quot;free_y&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-5-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggplot(world1, aes(date, NewDeaths, color = Country)) + geom_line() + 
+    scale_color_hue() + theme(legend.position = &quot;none&quot;) + geom_point() + 
+    labs(title = &quot;New Coronavirus Deaths Over Time&quot;, x = &quot;Date (12/31/2019 - 03/09/2020)&quot;, 
+        y = &quot;Number of New Deaths&quot;) + theme(axis.text.x = element_text(size = 2, 
+    angle = 45)) + facet_wrap(~EU, scale = &quot;free_y&quot;) + geom_point(stat = &quot;summary&quot;, 
+    fun.y = &quot;mean&quot;, color = &quot;black&quot;, size = 1, shape = &quot;diamond&quot;)</code></pre>
+<p><img src="/project1_files/figure-html/unnamed-chunk-5-2.png" width="672" style="display: block; margin: auto;" /> When grouping by European Union status, the graphs indicate that non-EU/EEA countries had the highest incidents of new coronavirus cases over time, with new cases reaching into the high thousands per day. One day 15,000 cases were reported in China. The EU also has high numbers of new cases, often in the low thousands per day. Case reporting in the former EU and the Japanese cruise ship were around similar numbers. EU candidates and potential (Albania) were low in case numbers since there are only a few countries in this category. Numbers of cases spiked in late February/early March for EEA, EU, and former EU.</p>
+<p>When grouping by EU status, death reports were high in both EU and non-EU countries, with EU countries having more deaths in the later dates and non-EU deaths being spread out throughout the reporting period. There were still far more deaths in the non-EU countries than EU. There were seven deaths on the cruise ship in Japan. The EEA and EU candidate countries each had one death. The potential EU country had no deaths. The former EU countries had ten deaths.</p>
+<pre class="r"><code># pam2&lt;-worlddata%&gt;%na.omit()%&gt;%select_if(is.numeric)%&gt;%select(-Overall.rank,-NewConfCases,-NewDeaths,-Score)%&gt;%pam(3)
+# pam2
+
+# sil_width&lt;-vector() for(i in 2:10){ pam_fit
+# &lt;-worlddata%&gt;%na.omit()%&gt;%select_if(is.numeric)%&gt;%select(-Overall.rank)%&gt;%pam(i)
+# sil_width[i] &lt;- pam_fit$silinfo$avg.width }
+# ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name=&#39;k&#39;,breaks=1:10)
+
+# final&lt;-worlddata%&gt;%mutate(cluster=as.factor(pam2$clustering))
+# confmat&lt;-final%&gt;%group_by(Country)%&gt;%count(cluster)%&gt;%arrange(desc(n))%&gt;%
+# pivot_wider(names_from=&#39;cluster&#39;,values_from=&#39;n&#39;,values_fill
+# = list(&#39;n&#39;=0)) confmat
+
+# accuracy
+# round(sum(diag(as.matrix(confmat[,2:4])))/sum(confmat[,2:4]),4)
+
+# ggplot(final,
+# aes(x=Social.support,y=Healthy.life.expectancy,
+# color=cluster))+geom_point()
+
+# library(GGally) ggpairs(final, columns=1:4,
+# aes(color=Country))
+
+## Interpreting Average Silhouette Width plot(pam2,which=2)</code></pre>
+<p>…</p>

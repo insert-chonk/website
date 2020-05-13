@@ -1,0 +1,223 @@
+---
+title: "Project 2: Modeling, Testing, and Predicting"
+author: "Chloe Nguyen"
+date: '2020-05-01'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+hook_output = knit_hooks$get('output')
+knit_hooks$set(output = function(x, options) {
+  # this hook is used only when the linewidth option is not NULL
+  if (!is.null(n <- options$linewidth)) {
+    x = knitr:::split_lines(x)
+    # any lines wider than n should be wrapped
+    if (any(nchar(x) > n)) x = strwrap(x, width = n)
+    x = paste(x, collapse = '\n')
+  }
+  hook_output(x, options)
+})
+
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE,fig.align="center",warning=FALSE,message=FALSE,fig.width=8, fig.height=5, linewidth=60)
+options(tibble.width = 100,width = 100)
+library(tidyverse)
+```
+
+
+```{r}
+class_diag<-function(probs,truth){
+  
+  tab<-table(factor(probs>.5,levels=c("FALSE","TRUE")),truth)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[2,2]/colSums(tab)[2]
+  spec=tab[1,1]/colSums(tab)[1]
+  ppv=tab[2,2]/rowSums(tab)[2]
+
+  if(is.numeric(truth)==FALSE & is.logical(truth)==FALSE) truth<-as.numeric(truth)-1
+  
+  #CALCULATE EXACT AUC
+  ord<-order(probs, decreasing=TRUE)
+  probs <- probs[ord]; truth <- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup<-c(probs[-1]>=probs[-length(probs)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+```
+
+## Chloe Nguyen cmn2223
+
+```{r}
+library(readxl)
+hcharperf <- read_excel("hcharperf.xlsx")
+perf<-hcharperf%>%
+  select(host,condition,pupal.weight,sex,survival.larvae.pupae, survival.pupae.adult,time.larvae.adult)
+head(perf)
+glimpse(perf)
+```
+This dataset includes performance data on zebra longwing butterflies (species: Heliconius charitonia) throughout their life cycle, as obtained from the Brackenridge Field Laboratory at UT Austin. The selected variables are host (Passiflora host plant species that the larvae were fed with), rearing condition (16 ounce cup or mesh bag), pupal.weight (mass of pupae in grams), sex (male or female), survival.larvae.pupae (binary variable of whether the larva survived to pupation, with 1 for survival), survival.pupae.adult (binary variable of whether the pupa survived to adulthood/butterfly stage, with 1 for survival), and time.larvae.adult (number of days from caterpillar to adult butterfly). There are 856 observations.
+
+
+```{r}
+perf1<-perf%>%na.omit() #NAs omitted
+perfman<-manova(cbind(pupal.weight,time.larvae.adult)~condition,data=perf1)
+summary(perfman)
+```
+The overall one-way MANOVA is not significant, so mean pupal weight and mean time from larvae to adult do not differ by rearing condition (Pillai= 0.005, F(2,240)=0.654, p > 0.05). The assumptions include: random independently sampled observations, multivariate normality of DVs, homogeneity of within-group covariance matrices, linearity among DVs, no extreme outliers, and no multicollinearity. Some but not all of these assumptions are likely to have been met due to the fact that there are so many assumptions that they are hard to meet.
+
+
+```{r}
+set.seed(348)
+
+pupwt <- vector()
+for(i in 1:5000){
+newdat<-data.frame(weight=sample(perf1$pupal.weight),sex=perf1$sex)
+pupwt[i]<-mean(newdat[newdat$sex=="F",]$weight)-
+mean(newdat[newdat$sex=="M",]$weight)}
+perf1%>%group_by(sex)%>%summarize(means=mean(pupal.weight))%>%summarize(`mean_diff:`=diff(means))
+{hist(pupwt,main="",ylab=""); abline(v = 0.01775884,col="red")}
+
+t.test(data=perf1,pupal.weight~sex)
+```
+I generated a distribution of 5000 mean differences on randomized data and performed a Welch Two Sample t-test. The null hypothesis is that the mean weights of male and female pupae do not differ. The alternative hypothesis is that there is a significant difference in the mean pupal weights between sexes. Results show that the sexes have a significant mean difference in pupal weights (t = 2.21, df = 188, p < 0.05).
+
+
+```{r}
+library(lmtest)
+library(sandwich)
+perffit<-lm(time.larvae.adult ~ host*sex, data=perf)
+summary(perffit)
+
+bptest(perffit)
+coeftest(perffit, vcov = vcovHC(perffit))
+```
+Based on the intercept, larvae fed with P. affinis have an average time to adulthood of 28.13 days without taking into account sex. Larvae fed with P.biflora reach adulthood on average -3.39 days less than with P.affinis. P.foetida and P.incarnata increase the time to reach adulthood by 3.62 and 3.37 days respectively, compared to P.aff; while P.lutea and P.suberosa decrease time to reach adulthood by -3.18 and -0.51 days respectively, compared to P.aff. Being a male decreases time to adulthood by 1.7 days. When taking into account the sex of the larvae, there is a difference in slopes of 2.09 between P.aff and P.bi, -2.55 between P.aff and P.foet, 2.60 between P.aff and P.inc, 2.07 between P.aff and P.lut, and 4.42 between P.aff and P.sub. A linear graph could not be made since the two predictor variables are categorical.
+Homoskedasticity is met. Null hypothesis of the Breusch-Pagan test was not rejected (BP = 15.913, df = 11, p-value > 0.05). Linearity not checked because predictor variables are categorical. After recomputing regression results with robust standard errors, significance remained the same. The intercept/hostP.aff, hostP.bi, hostP.foet, hostP.lut, and hostP.sub:sexM coefficients were all significant (p<0.05). The model explains ~24.05% of the variation in the outcome.
+
+
+```{r}
+#bootstrap
+perffit<-lm(time.larvae.adult ~ host*sex, data=perf)
+summary(perffit)
+
+samp_distn<-replicate(5000, {
+boot_dat <- sample_frac(perf, replace=T)
+fit <- glm(time.larvae.adult ~ host*sex, data=boot_dat)
+coef(fit)
+})
+
+#samp_distn%>%t%>%as.data.frame%>%summarize_all(sd,na.rm=T)
+```
+
+The results of the bootstrapped standard errors changed compared to the original standard errors, so the significance of some of the p values would also change. For instance, the original standard errors for the significant values of coefficients were 0.946 for P.aff, 1.098 for P.bi, 1.603 for P.foet, 1.238 for P.lut, and 1.955 for hostP.sub:sexM. The bootstrapped SEs were 0.777 for P.aff, 0.855 for P.bi, 1.469 for P.foet, 1.023 for P.lut, and 2.031 for hostP.sub:sexM.
+
+
+```{r}
+#logistic regression with binary variable
+perf2<-perf%>%filter(!is.na(condition))%>%filter(host!="P.fil",condition!="Pop up")%>%
+  mutate(condition=recode(condition,"16 oz"="16.oz"))
+#removed irrelevant variables and renamed redundant label
+perf2
+library(lmtest)
+logfit<-glm(survival.larvae.pupae~host+condition, data=perf2, family="binomial")
+summary(logfit)
+coeftest(logfit)
+exp(coef(logfit))
+
+prob<-predict(logfit,type="response")
+table(predict=as.numeric(prob>.5),truth=perf2$survival.larvae.pupae)%>%addmargins #matrix
+
+class_diag(prob,perf2$survival.larvae.pupae)
+
+perf2$logit<-predict(logfit,type="link")
+perf2%>%ggplot()+geom_density(aes(logit,fill=as.factor(survival.larvae.pupae)), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+
+  xlab("predictor (logit)")
+
+library(plotROC)
+ROCplot<-ggplot(perf2)+geom_roc(aes(d=survival.larvae.pupae,m=prob), n.cuts=0) 
+ROCplot
+calc_auc(ROCplot)
+
+set.seed(1234)
+k=10
+
+data1<-perf2[sample(nrow(perf2)),]
+folds<-cut(seq(1:nrow(perf2)),breaks=k,labels=F)
+
+diags<-NULL
+for(i in 1:k){         
+train<-data1[folds!=i,] 
+test<-data1[folds==i,]  
+
+truth<-test$survival.larvae.pupae
+
+fit<- glm(survival.larvae.pupae~host+condition, data=train, family="binomial")
+probs<- predict(fit,newdata = test,type="response")
+
+diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+```
+Controlling for condition, host plants P.bi, P.foet, and P.inc have a significant effect on the survival of larvae to the pupal stage (p < 0.05). Controlling for host plant, condition does not have a significant effect on survival (p > 0.05). Odds of survival are much higher on P. bi compared to the rest of the plant species.
+The AUC is 0.724, which is considered a fair area under the curve. The accuracy is 0.674, sensitivity is 0.362, the specificity is 0.865, and ppv is 0.621. After 10-fold CV, the AUC is 0.714, accuracy is 0.674, and sensitivity is 0.363.
+
+
+```{r}
+perf3<-perf1%>%select(-survival.larvae.pupae,-survival.pupae.adult)
+#removed the binary columns for this part since it contained
+#all those who survived to adulthood, making the values all ones
+library(glmnet)
+set.seed(1234)
+y<-as.matrix(perf3$time.larvae.adult)
+x<-model.matrix(time.larvae.adult~.,data=perf3)
+head(x)
+cv<-cv.glmnet(x,y, family = "gaussian")
+#changed family from binomial since the y variable is continuous
+lasso1<-glmnet(x,y, family = "gaussian",lambda=cv$lambda.1se)
+coef(lasso1)
+
+lasso_prob<-predict(lasso1, newx=x, type="response")
+table(predicted=lasso_prob>.5,survival=perf3$time.larvae.adult)
+class_diag(lasso_prob,perf3$time.larvae.adult)
+
+
+fitlasso<-glm(time.larvae.adult~host+pupal.weight, data=perf3, family = "gaussian")
+fitlasso
+probsl<-predict(fitlasso,type="response")
+
+set.seed(1234)
+k=10
+
+datalasso<-perf3[sample(nrow(perf3)),]
+folds<-cut(seq(1:nrow(perf3)),breaks=k,labels=F)
+
+diags<-NULL
+for(i in 1:k){         
+train<-datalasso[folds!=i,] 
+test<-datalasso[folds==i,]  
+
+truth<-test$time.larvae.adult
+
+fit<- glm(time.larvae.adult~host+pupal.weight, data=train)
+probs<- predict(fit,newdata = test,type="response")
+
+diags<-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)
+```
+The variables retained are hostP.bi, hostP.foet, hostP.inc, hostP.lut, hostP.sub, and pupal.weight. The residual deviance is 3169?
+
+

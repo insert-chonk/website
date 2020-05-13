@@ -1,0 +1,124 @@
+---
+title: 'Project 1: Exploratory Data Analysis'
+author: "SDS348"
+date: '03/15/2020'
+output:
+  pdf_document:
+    toc: no
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+```{r}
+library(tidyverse)
+```
+####I chose a dataset on Coronavirus statistics with variables of date reported, country, new confirmed cases, new deaths, geographic ID, and European Union status. I also chose the 2019 World Happiness report dataset, which is based on a survey of global happiness by country and includes the variables for overall happiness rank among countries, happiness score from 1-10, and the following variables that indicate how much of each variable contributes to the overall happiness score: GDP per capita, social support, healthy life expectancy, freedom to make life choices, generosity, and perceptions of corruption. I found both these datasets on Kaggle. I chose them because of Coronvirus' relevancy in today's news and our daily lives, and to see how different countries were affected. When the 2020 happiness report comes in, I hope to compare it to this data and see whether scores changed perhaps due to degree of being affected by Coronavirus. I predict that Coronavirus affects countries with lower happiness scores more severely.
+
+```{r}
+corona_data<-read.csv('C://Users/cmknguyen/Desktop/Website/content/corona_data.csv', header=T)
+worldhappiness<-read.csv("C://Users/cmknguyen/Desktop/Website/content/worldhappiness.csv", header = T)
+corona_data<-corona_data%>%rename(Country=CountryExp)
+worldhappiness<-worldhappiness%>%rename(Country=Country.or.region)
+
+corona_data%>%anti_join(worldhappiness)
+worlddata<-corona_data%>%left_join(worldhappiness)
+glimpse(worlddata)
+```
+####I chose a left join because I wanted to keep all the coronavirus data and have the happiness variables as an additional factor (not all countries in the coronavirus dataset are on the happiness dataset). The coronavirus data is also logged by day, so it is important to retain each datapoint to conduct accurate analyses. No cases were dropped.
+
+```{r}
+#new variable MortalityRate
+world1<-worlddata%>% separate(DateRep,into = c("day","month","year"),sep = "/")%>% unite(year, month, day, col="date",sep="-",remove=F)%>%arrange(Country,date)%>%group_by(Country)%>%mutate(MortalityRate=cumsum(NewDeaths)/cumsum(NewConfCases))
+
+world1%>%arrange(desc(date))
+
+world1%>%group_by(Country)%>%na.omit(MortalityRate)%>% summarize(mean(MortalityRate))
+
+world1<-world1%>%mutate(EU=recode(EU,"0"="Cruise Ship in Japan"))
+
+#Correlation matrix
+worlddata%>%na.omit() %>% select_if(is.numeric) %>% cor()
+
+worlddata%>% summarize(mean(Freedom.to.make.life.choices, na.rm=T),sd(Freedom.to.make.life.choices, na.rm=T), var(Freedom.to.make.life.choices, na.rm=T), min(Freedom.to.make.life.choices, na.rm=T), max(Freedom.to.make.life.choices, na.rm=T), n_distinct(Freedom.to.make.life.choices, na.rm=T))
+
+worlddata%>%group_by(EU,Country)%>% summarize(mean(Score, na.rm=T),sd(Score, na.rm=T), var(Score, na.rm=T), min(Score, na.rm=T), max(Score, na.rm=T), n_distinct(Score, na.rm=T))
+
+worlddata%>%group_by(Country)%>% summarize(mean(Social.support, na.rm=T),sd(Social.support, na.rm=T), var(Social.support, na.rm=T), min(Social.support, na.rm=T), max(Social.support, na.rm=T), n_distinct(Social.support, na.rm=T))%>% pivot_longer(cols = c(contains("=")))%>% separate(name,into = c("stat"),sep = "T")
+
+
+worlddata%>% filter(EU=='EU') %>% summarize(mean(Score))
+worlddata%>% filter(EU=='EEA') %>% summarize(mean(Score,na.rm=T))
+worlddata%>% filter(EU=='Non-EU/EEA') %>% summarize(mean(Score,na.rm=T))
+
+
+```
+
+
+```{r}
+#correlation heatmap
+worlddata%>%na.omit()%>%select_if(is.numeric)%>%cor%>%as.data.frame%>%
+rownames_to_column%>%pivot_longer(-1)%>%
+ggplot(aes(rowname,name,fill=value))+geom_tile()+
+geom_text(aes(label=round(value,2)))+
+xlab("")+ylab("")+
+scale_fill_gradient2(low="red",high="blue")+
+ theme(axis.text.x = element_text(angle = 45, vjust = 1, size = 12, hjust = 1))
+```
+####In the correlation heatmap, social support has the highest correlation (0.84) to a country's happiness score. Generosity contributes the least to a country's overall happiness score, with a correlation of 0.37. The overall rank correlations are negative because the "lower number" in rank is a higher rank, i.e. rank 1 would be the happiest country. New cases are positively correlated with new deaths (0.74). However, Coronavirus targets countries indiscriminately regardless of factors associated with happiness, as there is very little if any correlation between either new cases or new deaths and any of the happiness variables (-0.08-0.06 range).
+
+
+```{r}
+#ggplots
+ggplot(world1, aes(date, NewConfCases,color=Country))+ geom_line()+scale_color_hue()+theme(legend.position = "none")+ geom_point()+ labs(title="New Coronavirus Cases Over Time", x="Date (12/31/2019 - 03/09/2020)", y = "Number of New Confirmed Cases")+scale_y_continuous(breaks = waiver())+
+  theme(axis.text.x = element_text(size=2, angle=45))+
+  facet_wrap(~EU, scale="free_y")
+
+ggplot(world1, aes(date, NewDeaths,color=Country))+ geom_line()+scale_color_hue()+theme(legend.position = "none")+ geom_point()+ labs(title="New Coronavirus Deaths Over Time", x="Date (12/31/2019 - 03/09/2020)", y = "Number of New Deaths")+ theme(axis.text.x = element_text(size=2, angle=45))+
+  facet_wrap(~EU, scale="free_y")+geom_point(stat='summary',fun.y='mean',color='black',size=1,shape='diamond')
+```
+####When grouping by European Union status, the graphs indicate that non-EU/EEA countries had the highest incidents of new coronavirus cases over time, with new cases reaching into the high thousands per day. One day 15,000 cases were reported in China. The EU also has high numbers of new cases, often in the low thousands per day. Case reporting in the former EU and the Japanese cruise ship were around similar numbers. EU candidates and potential (Albania) were low in case numbers since there are only a few countries in this category. Numbers of cases spiked in late February/early March for EEA, EU, and former EU.
+
+####When grouping by EU status, death reports were high in both EU and non-EU countries, with EU countries having more deaths in the later dates and non-EU deaths being spread out throughout the reporting period. There were still far more deaths in the non-EU countries than EU. There were seven deaths on the cruise ship in Japan. The EEA and EU candidate countries each had one death. The potential EU country had no deaths. The former EU countries had ten deaths.
+
+```{r}
+#pam2<-worlddata%>%na.omit()%>%select_if(is.numeric)%>%select(-Overall.rank,-NewConfCases,-NewDeaths,-Score)%>%pam(3)
+#pam2
+
+#sil_width<-vector()
+#for(i in 2:10){
+#pam_fit <-worlddata%>%na.omit()%>%select_if(is.numeric)%>%select(-Overall.rank)%>%pam(i)
+#sil_width[i] <- pam_fit$silinfo$avg.width
+#}
+#ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+
+#final<-worlddata%>%mutate(cluster=as.factor(pam2$clustering))
+#confmat<-final%>%group_by(Country)%>%count(cluster)%>%arrange(desc(n))%>%
+#pivot_wider(names_from="cluster",values_from="n",values_fill = list('n'=0))
+#confmat
+
+#accuracy
+#round(sum(diag(as.matrix(confmat[,2:4])))/sum(confmat[,2:4]),4)
+
+#ggplot(final, aes(x=Social.support,y=Healthy.life.expectancy, color=cluster))+geom_point()
+
+#library(GGally)
+#ggpairs(final, columns=1:4, aes(color=Country))
+
+## Interpreting Average Silhouette Width
+#plot(pam2,which=2)
+```
+
+...
+
+
+
+
+

@@ -1,0 +1,28 @@
+---
+title: My New Post
+author: ''
+date: '2020-05-13'
+slug: my-new-post
+categories: []
+tags: []
+description: ''
+---
+
+
+Something in python
+```{python}
+print("hello world")
+x="dog"
+x
+```
+
+```{r}
+library(reticulate)
+py$x
+y<-2
+```
+
+```{python}
+r.y+1 == 3
+```
+
