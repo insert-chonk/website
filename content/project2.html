@@ -34,8 +34,6 @@ output:
 
   data.frame(acc,sens,spec,ppv,auc)
 }</code></pre>
-<div id="chloe-nguyen-cmn2223" class="section level2">
-<h2>Chloe Nguyen cmn2223</h2>
 <pre class="r"><code>library(readxl)
 hcharperf &lt;- read_excel(&quot;hcharperf.xlsx&quot;)
 perf&lt;-hcharperf%&gt;%
@@ -408,4 +406,3 @@ summarize_all(diags,mean)</code></pre>
 <pre><code>##      acc sens spec    ppv auc
 ## 1 0.0785    1    0 0.0785   1</code></pre>
 <p>The variables retained are hostP.bi, hostP.foet, hostP.inc, hostP.lut, hostP.sub, and pupal.weight. The residual deviance is 3169?</p>
-</div>

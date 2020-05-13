@@ -12,14 +12,13 @@
     
     
     <item>
-      <title>My New Post</title>
+      <title>R &#43; Python = Friends &lt;3 :)</title>
       <link>/blog/my-new-post/</link>
       <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/blog/my-new-post/</guid>
-      <description> something else here
-Something in python
-print(&amp;quot;hello world&amp;quot;) ## hello world x=&amp;quot;dog&amp;quot; x ## &amp;#39;dog&amp;#39; library(reticulate) py$x ## [1] &amp;quot;dog&amp;quot; y&amp;lt;-2 r.y+1 == 3 ## True </description>
+      <description>R and Python want to play together! Aww :’) Let’s get them a reticulate package so they can play.
+#R code chunk library(reticulate) #Python code chunk print(&amp;quot;hello world&amp;quot;) ## hello world x=&amp;quot;dog&amp;quot; x ## &amp;#39;dog&amp;#39; import re string1=&amp;quot;We have to extract these numbers 12, 47, 48 The integers numbers are also interesting: 189 2036 314\&amp;#39;,\&amp;#39; is a separator, so please extract these numbers 125,789,1450 and also these 564,90456 We like to offer you 7890$ per month in order to complete this task.</description>
     </item>
     
     <item>
@@ -28,7 +27,7 @@ print(&amp;quot;hello world&amp;quot;) ## hello world x=&amp;quot;dog&amp;quot; 
       <pubDate>Fri, 01 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/project2/</guid>
-      <description>class_diag&amp;lt;-function(probs,truth){ tab&amp;lt;-table(factor(probs&amp;gt;.5,levels=c(&amp;quot;FALSE&amp;quot;,&amp;quot;TRUE&amp;quot;)),truth) acc=sum(diag(tab))/sum(tab) sens=tab[2,2]/colSums(tab)[2] spec=tab[1,1]/colSums(tab)[1] ppv=tab[2,2]/rowSums(tab)[2] if(is.numeric(truth)==FALSE &amp;amp; is.logical(truth)==FALSE) truth&amp;lt;-as.numeric(truth)-1 #CALCULATE EXACT AUC ord&amp;lt;-order(probs, decreasing=TRUE) probs &amp;lt;- probs[ord]; truth &amp;lt;- truth[ord] TPR=cumsum(truth)/max(1,sum(truth)) FPR=cumsum(!truth)/max(1,sum(!truth)) dup&amp;lt;-c(probs[-1]&amp;gt;=probs[-length(probs)], FALSE) TPR&amp;lt;-c(0,TPR[!dup],1); FPR&amp;lt;-c(0,FPR[!dup],1) n &amp;lt;- length(TPR) auc&amp;lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) ) data.frame(acc,sens,spec,ppv,auc) } Chloe Nguyen cmn2223 library(readxl) hcharperf &amp;lt;- read_excel(&amp;quot;hcharperf.xlsx&amp;quot;) perf&amp;lt;-hcharperf%&amp;gt;% select(host,condition,pupal.weight,sex,survival.larvae.pupae, survival.pupae.adult,time.larvae.adult) head(perf) ## # A tibble: 6 x 7 ## host condition pupal.weight sex survival.larvae.pupae survival.pupae.adult time.larvae.adult ## &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; ## 1 P.</description>
+      <description>class_diag&amp;lt;-function(probs,truth){ tab&amp;lt;-table(factor(probs&amp;gt;.5,levels=c(&amp;quot;FALSE&amp;quot;,&amp;quot;TRUE&amp;quot;)),truth) acc=sum(diag(tab))/sum(tab) sens=tab[2,2]/colSums(tab)[2] spec=tab[1,1]/colSums(tab)[1] ppv=tab[2,2]/rowSums(tab)[2] if(is.numeric(truth)==FALSE &amp;amp; is.logical(truth)==FALSE) truth&amp;lt;-as.numeric(truth)-1 #CALCULATE EXACT AUC ord&amp;lt;-order(probs, decreasing=TRUE) probs &amp;lt;- probs[ord]; truth &amp;lt;- truth[ord] TPR=cumsum(truth)/max(1,sum(truth)) FPR=cumsum(!truth)/max(1,sum(!truth)) dup&amp;lt;-c(probs[-1]&amp;gt;=probs[-length(probs)], FALSE) TPR&amp;lt;-c(0,TPR[!dup],1); FPR&amp;lt;-c(0,FPR[!dup],1) n &amp;lt;- length(TPR) auc&amp;lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) ) data.frame(acc,sens,spec,ppv,auc) } library(readxl) hcharperf &amp;lt;- read_excel(&amp;quot;hcharperf.xlsx&amp;quot;) perf&amp;lt;-hcharperf%&amp;gt;% select(host,condition,pupal.weight,sex,survival.larvae.pupae, survival.pupae.adult,time.larvae.adult) head(perf) ## # A tibble: 6 x 7 ## host condition pupal.weight sex survival.larvae.pupae survival.pupae.adult time.larvae.adult ## &amp;lt;chr&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;chr&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; &amp;lt;dbl&amp;gt; ## 1 P.</description>
     </item>
     
     <item>

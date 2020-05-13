@@ -55,7 +55,6 @@ class_diag<-function(probs,truth){
 }
 ```
 
-## Chloe Nguyen cmn2223
 
 ```{r}
 library(readxl)

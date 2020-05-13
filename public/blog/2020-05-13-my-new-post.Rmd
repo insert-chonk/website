@@ -1,5 +1,5 @@
 ---
-title: My New Post
+title: R + Python = Friends <3 :)
 author: ''
 date: '2020-05-13'
 slug: my-new-post
@@ -7,17 +7,35 @@ categories: []
 tags: []
 description: ''
 ---
-something else here
 
-Something in python
+![](/blog/2020-05-13-my-new-post_files/pythonmeme1.jpg)
+
+R and Python want to play together! Aww :')
+Let's get them a reticulate package so they can play.
+```{r}
+#R code chunk
+library(reticulate)
+```
+
+
 ```{python}
+#Python code chunk
 print("hello world")
 x="dog"
 x
+
+import re
+
+string1="We have to extract these numbers 12, 47, 48 The integers numbers are also interesting: 189 2036 314\',\' is a separator, so please extract these numbers 125,789,1450 and also these 564,90456 We like to offer you 7890$ per month in order to complete this task... we are joking"
+print(string1)
+
+
+
+re.findall(r"\d+",string1)
 ```
 
 ```{r}
-library(reticulate)
+
 py$x
 y<-2
 ```
