@@ -8,7 +8,7 @@ tags: []
 description: ''
 ---
 
-![](/blog/2020-05-13-my-new-post_files/pythonmeme1.jpg)
+![](/blog/2020-05-13-my-new-post_files/kkpizza.jpg)
 
 You've probably seen those YouTube comments that say something like, "Take a shot every time someone says [insert word/phrase that has been repeated numerous times in video]." (Disclaimer: I am not advocating for anyone to actually do this challenge; you would probably get alcohol poisoning and die.)
 
@@ -33,3 +33,5 @@ pizzacounts=tuple(re.finditer(r"pizza",string1))
 len(pizzacounts)
 ```
 The word "pizza" is said a total of 18 times in the song. Sure, we could have counted them manually (slowly and individually) like a brute, or copied and pasted the video transcript into Microsoft Word and used Ctrl+F, but where's the fun in that? I'd rather use code instead!
+
+![](/blog/2020-05-13-my-new-post_files/pythonmeme1.jpg)
