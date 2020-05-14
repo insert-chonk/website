@@ -1,4 +1,8 @@
-"0","print(""hello world"")
-x=""dog"""
-"1","hello world
-"
+"0","import re
+
+string1=""[Squidward] Ow Ow Ow! (x2 over SBSP) [SBSP] The Krusty Krab pizza is the pizza for you and me! The Krusty Krab pizza is the pizza [Squidward] And my feet are killing me [SBSP] The Krusty Krab pizza is the pizza for you and me! The Krusty Krab pizza is the pizza free del-i-very The Krusty Krab pizza is the pizza very ta-as-ty ...It's for the customer! [Squidward] Who cares about the customer?! [SBSP] (gasps) Squidward! The Krusty Krab pizza is the pizza absolutivaly [SBSP rap] ba ba ba ba pizza co co cling cling tish pizza tee tee oga ba ta du du du du pizza do do dugga da da pizza du do duga ding (low pitched spongebob) 'Krusty Kraahyahayabyahahyab pizza, is the pizza for, (high pitched spongebob) you and meheeheeheeee!'""
+
+re.findall(r""pizza"",string1)
+
+pizzacounts=tuple(re.finditer(r""pizza"",string1))
+len(pizzacounts)"

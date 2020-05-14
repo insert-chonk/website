@@ -14,25 +14,18 @@ description: ''
 <img src="/blog/2020-05-13-my-new-post_files/pythonmeme1.jpg" />
 
 </div>
-<p>R and Python want to play together! Aww :’) Let’s get them a reticulate package so they can play.</p>
-<pre class="r"><code>#R code chunk
-library(reticulate)</code></pre>
-<pre class="python"><code>#Python code chunk
-print(&quot;hello world&quot;)</code></pre>
-<pre><code>## hello world</code></pre>
-<pre class="python"><code>x=&quot;dog&quot;
-x</code></pre>
-<pre><code>## &#39;dog&#39;</code></pre>
+<p>You’ve probably seen those YouTube comments that say something like, “Take a shot every time someone says [insert word/phrase that has been repeated numerous times in video].” (Disclaimer: I am not advocating for anyone to actually do this challenge; you would probably get alcohol poisoning and die.)</p>
+<p>But did you know you could use R and Python together to count the number of times the word has been said?</p>
+<p>Here’s an example using the lyrics of the “Krusty Krab Pizza” song from Spongebob Squarepants. We’ll be counting the number of times the word “pizza” is said. The full lyrics are included in the following string.</p>
 <pre class="python"><code>import re
 
-string1=&quot;We have to extract these numbers 12, 47, 48 The integers numbers are also interesting: 189 2036 314\&#39;,\&#39; is a separator, so please extract these numbers 125,789,1450 and also these 564,90456 We like to offer you 7890$ per month in order to complete this task... we are joking&quot;
-print(string1)
-</code></pre>
-<pre><code>## We have to extract these numbers 12, 47, 48 The integers numbers are also interesting: 189 2036 314&#39;,&#39; is a separator, so please extract these numbers 125,789,1450 and also these 564,90456 We like to offer you 7890$ per month in order to complete this task... we are joking</code></pre>
-<pre class="python"><code>re.findall(r&quot;\d+&quot;,string1)</code></pre>
-<pre><code>## [&#39;12&#39;, &#39;47&#39;, &#39;48&#39;, &#39;189&#39;, &#39;2036&#39;, &#39;314&#39;, &#39;125&#39;, &#39;789&#39;, &#39;1450&#39;, &#39;564&#39;, &#39;90456&#39;, &#39;7890&#39;]</code></pre>
-<pre class="r"><code>py$x</code></pre>
-<pre><code>## [1] &quot;dog&quot;</code></pre>
-<pre class="r"><code>y&lt;-2</code></pre>
-<pre class="python"><code>r.y+1 == 3</code></pre>
-<pre><code>## True</code></pre>
+string1=&quot;[Squidward] Ow Ow Ow! (x2 over SBSP) [SBSP] The Krusty Krab pizza is the pizza for you and me! The Krusty Krab pizza is the pizza [Squidward] And my feet are killing me [SBSP] The Krusty Krab pizza is the pizza for you and me! The Krusty Krab pizza is the pizza free del-i-very The Krusty Krab pizza is the pizza very ta-as-ty ...It&#39;s for the customer! [Squidward] Who cares about the customer?! [SBSP] (gasps) Squidward! The Krusty Krab pizza is the pizza absolutivaly [SBSP rap] ba ba ba ba pizza co co cling cling tish pizza tee tee oga ba ta du du du du pizza do do dugga da da pizza du do duga ding (low pitched spongebob) &#39;Krusty Kraahyahayabyahahyab pizza, is the pizza for, (high pitched spongebob) you and meheeheeheeee!&#39;&quot;</code></pre>
+<p>In Python code chunks, use ‘r’ to access R-defined objects (e.g. r“pizza”). We can use re.findall to grab all instances of the word “pizza”.</p>
+<pre class="python"><code>#Python chunk
+re.findall(r&quot;pizza&quot;,string1)</code></pre>
+<pre><code>## [&#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;, &#39;pizza&#39;]</code></pre>
+<p>We can also count the total number by storing the iterations in a tuple and then using len().</p>
+<pre class="python"><code>pizzacounts=tuple(re.finditer(r&quot;pizza&quot;,string1))
+len(pizzacounts)</code></pre>
+<pre><code>## 18</code></pre>
+<p>The word “pizza” is said a total of 18 times in the song. Sure, we could have counted them manually (slowly and individually) like a brute, or copied and pasted the video transcript into Microsoft Word and used Ctrl+F, but where’s the fun in that? I’d rather use code instead!</p>

@@ -17,8 +17,8 @@
       <pubDate>Wed, 13 May 2020 00:00:00 +0000</pubDate>
       
       <guid>/blog/my-new-post/</guid>
-      <description>R and Python want to play together! Aww :’) Let’s get them a reticulate package so they can play.
-#R code chunk library(reticulate) #Python code chunk print(&amp;quot;hello world&amp;quot;) ## hello world x=&amp;quot;dog&amp;quot; x ## &amp;#39;dog&amp;#39; import re string1=&amp;quot;We have to extract these numbers 12, 47, 48 The integers numbers are also interesting: 189 2036 314\&amp;#39;,\&amp;#39; is a separator, so please extract these numbers 125,789,1450 and also these 564,90456 We like to offer you 7890$ per month in order to complete this task.</description>
+      <description>You’ve probably seen those YouTube comments that say something like, “Take a shot every time someone says [insert word/phrase that has been repeated numerous times in video].” (Disclaimer: I am not advocating for anyone to actually do this challenge; you would probably get alcohol poisoning and die.)
+But did you know you could use R and Python together to count the number of times the word has been said?</description>
     </item>
     
   </channel>

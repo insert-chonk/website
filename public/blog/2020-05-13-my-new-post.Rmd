@@ -10,37 +10,26 @@ description: ''
 
 ![](/blog/2020-05-13-my-new-post_files/pythonmeme1.jpg)
 
-R and Python want to play together! Aww :')
-Let's get them a reticulate package so they can play.
-```{r}
-#R code chunk
-library(reticulate)
-```
+You've probably seen those YouTube comments that say something like, "Take a shot every time someone says [insert word/phrase that has been repeated numerous times in video]." (Disclaimer: I am not advocating for anyone to actually do this challenge; you would probably get alcohol poisoning and die.)
 
+But did you know you could use R and Python together to count the number of times the word has been said?
 
+Here's an example using the lyrics of the "Krusty Krab Pizza" song from Spongebob Squarepants. We'll be counting the number of times the word "pizza" is said. The full lyrics are included in the following string.
 ```{python}
-#Python code chunk
-print("hello world")
-x="dog"
-x
-
 import re
 
-string1="We have to extract these numbers 12, 47, 48 The integers numbers are also interesting: 189 2036 314\',\' is a separator, so please extract these numbers 125,789,1450 and also these 564,90456 We like to offer you 7890$ per month in order to complete this task... we are joking"
-print(string1)
-
-
-
-re.findall(r"\d+",string1)
+string1="[Squidward] Ow Ow Ow! (x2 over SBSP) [SBSP] The Krusty Krab pizza is the pizza for you and me! The Krusty Krab pizza is the pizza [Squidward] And my feet are killing me [SBSP] The Krusty Krab pizza is the pizza for you and me! The Krusty Krab pizza is the pizza free del-i-very The Krusty Krab pizza is the pizza very ta-as-ty ...It's for the customer! [Squidward] Who cares about the customer?! [SBSP] (gasps) Squidward! The Krusty Krab pizza is the pizza absolutivaly [SBSP rap] ba ba ba ba pizza co co cling cling tish pizza tee tee oga ba ta du du du du pizza do do dugga da da pizza du do duga ding (low pitched spongebob) 'Krusty Kraahyahayabyahahyab pizza, is the pizza for, (high pitched spongebob) you and meheeheeheeee!'"
 ```
 
-```{r}
-
-py$x
-y<-2
-```
-
+In Python code chunks, use 'r' to access R-defined objects (e.g. r"pizza"). We can use re.findall to grab all instances of the word "pizza".
 ```{python}
-r.y+1 == 3
+#Python chunk
+re.findall(r"pizza",string1)
 ```
 
+We can also count the total number by storing the iterations in a tuple and then using len().
+```{python}
+pizzacounts=tuple(re.finditer(r"pizza",string1))
+len(pizzacounts)
+```
+The word "pizza" is said a total of 18 times in the song. Sure, we could have counted them manually (slowly and individually) like a brute, or copied and pasted the video transcript into Microsoft Word and used Ctrl+F, but where's the fun in that? I'd rather use code instead!
